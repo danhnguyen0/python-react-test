@@ -1,0 +1,43 @@
+```yaml
+name: CI - frontend
+
+on:
+  push:
+    branches:
+      - main
+      - pipelinegen-setup
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Using Node.js v20 as a common stable version
+
+      - name: Install Node.js dependencies
+        working-directory: frontend
+        run: |
+          # Install with npm ci if package-lock.json exists, otherwise npm install
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            echo "package-lock.json not found, falling back to npm install."
+            npm install
+          fi
+
+      - name: Run Node.js tests
+        working-directory: frontend
+        # This step assumes a "test" script exists in package.json.
+        # If no test script is defined, this step will likely fail or skip.
+        # To conditionally run, a prior step could check package.json.
+        run: npm test
+
+      - name: Build Docker image
+        run: docker build -f frontend.Dockerfile -t frontend .
+```
