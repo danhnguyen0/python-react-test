@@ -1,5 +1,4 @@
 name: CI - frontend
-
 on:
   push:
     branches:
@@ -9,17 +8,16 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # Recommended latest LTS version for Node.js
+          node-version: '20' # Or any specific version your project requires
 
-      - name: Install dependencies
+      - name: Install Node.js dependencies
         working-directory: frontend
         run: |
           if [ -f package-lock.json ]; then
@@ -28,9 +26,14 @@ jobs:
             npm install
           fi
 
-      - name: Run tests (if 'test' script exists)
+      - name: Run tests
         working-directory: frontend
-        run: npm test || echo "No 'test' script found or tests skipped." # npm test will fail if no test script is defined. This allows the step to pass.
+        run: npm test
+        continue-on-error: true # Allow subsequent steps to run even if tests fail
+        # Note: This step will run 'npm test'. If your project does not have a 'test' script
+        # defined in package.json, this step might fail or report no tests found.
+        # You can remove or modify this step if testing is not applicable or requires a different command.
 
       - name: Build Docker image
+        # This command runs from the repository root as per conventions
         run: docker build -f frontend.Dockerfile -t frontend .
