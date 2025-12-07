@@ -2,11 +2,12 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY backend/requirements.txt .
+ENV PYTHONUNBUFFERED=1
 
+COPY backend/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY backend/. .
+COPY backend/main.py ./
 
 EXPOSE 8000
 
